@@ -1,16 +1,16 @@
 #include "rapidjson/document.h"
-#include "rapidjson/stringbuffer.h"
 #include <arpa/inet.h>
 #include <iostream>
 #include <sys/socket.h>
 #include <unistd.h>
 
+/*
+ * Sample client for receiving JSON data and marshaling it using RapidJSON using Sockets
+ */
 int main(int argc, char **argv) {
   const char *hostname = "127.0.0.1";
   const int port = 9999;
   int clientSocket = 0;
-  const int buffer_size = 512;
-  char buffer[buffer_size] = {0};
   std::cout << "Starting client, listening on port " << port << std::endl;
 
   if ((clientSocket = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
@@ -34,10 +34,14 @@ int main(int argc, char **argv) {
   }
 
   int bytesRead;
+  const int buffer_size = 512;
+  char buffer[buffer_size] = {0};
   while ((bytesRead = read(clientSocket, buffer, buffer_size)) > 0) {
     rapidjson::Document d;
     d.Parse(buffer);
-    std::cout << "Received from server: " << buffer << std::endl;
+    std::cout << "Received: \"" << d["content"].GetString() << "\" at time: " << d["time"].GetInt64() << std::endl;
+    // Clear buffer
+    memset(&buffer[0], 0, sizeof(buffer));
   }
   std::cout << "Connection closed by host or stream ended" << std::endl;
   close(clientSocket);

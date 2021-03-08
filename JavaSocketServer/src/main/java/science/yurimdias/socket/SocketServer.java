@@ -14,11 +14,15 @@ import java.util.Random;
 import java.util.Set;
 
 public class SocketServer {
-
-
     private ServerSocketChannel serverSocket;
     private Selector selector;
 
+    /**
+     * Starts the server at address and port
+     *
+     * @param address
+     * @param port
+     */
     public void start(String address, int port) {
         try {
             selector = Selector.open();
@@ -35,6 +39,9 @@ public class SocketServer {
         }
     }
 
+    /**
+     * Register the file descriptions, and contains the repetition loop
+     */
     public void work() {
         ObjectMapper objectMapper = new ObjectMapper();
         ByteBuffer buffer = ByteBuffer.allocate(512);
@@ -48,7 +55,6 @@ public class SocketServer {
                 System.out.println("Found " + selectorKeysActive.size() + " clients, sending messages...");
                 while (iter.hasNext()) {
                     SelectionKey key = iter.next();
-                    int interestOps = key.interestOps();
                     if (key.isAcceptable()) {
                         // Need to register intent to write to channel
                         SocketChannel client = serverSocket.accept();
@@ -60,7 +66,6 @@ public class SocketServer {
                         SocketMessage message = new SocketMessage(staticMessage);
                         String messageString = objectMapper.writeValueAsString(message);
                         try {
-                            buffer.clear();
                             client.write(buffer.wrap(messageString.getBytes()));
                         } catch (IOException e) {
                             // Can't write, connection closed midway
@@ -71,13 +76,16 @@ public class SocketServer {
                     }
                     iter.remove();
                 }
-                Thread.sleep(2000 + generator.nextInt(1000)); // Sleep 5s after each message
+                Thread.sleep(5000 + generator.nextInt(5000)); // Sleep 5s-10s after each message
             }
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
     }
 
+    /**
+     * Gracefully shutdowns the server
+     */
     public void shutdown() {
         if (!serverSocket.isOpen()) return;
         try {
