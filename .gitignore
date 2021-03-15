@@ -2,5 +2,6 @@
 *.iml
 CppClient/cmake-build-debug/
 JavaSocketServer/target/
+RustClient/target/
 
 *.docx

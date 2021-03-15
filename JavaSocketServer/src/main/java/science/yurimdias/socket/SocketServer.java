@@ -76,7 +76,7 @@ public class SocketServer {
                     }
                     iter.remove();
                 }
-                Thread.sleep(5000 + generator.nextInt(5000)); // Sleep 5s-10s after each message
+                Thread.sleep(1000 + generator.nextInt(1000)); // Sleep 5s-10s after each message
             }
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
